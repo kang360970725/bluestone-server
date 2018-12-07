@@ -46,6 +46,8 @@ var UserSQL = {
     editUsers7:'UPDATE users SET activation_state=1,endtime=?,bonus_base=? WHERE account = ? AND id = ?',//激活会员和重置时间
     editUsers8:'UPDATE users SET password=? WHERE account = ? AND password = ?',//会员修改密码
     putUsersByType:'UPDATE users SET type=? WHERE account = ? AND id = ?',//编辑会员类型
+    putUsersByGroup:'UPDATE users SET `group` = ? WHERE account in (?)',//编辑会员分组
+    putUsersByGlobal:'UPDATE users SET globalpartners=? WHERE account = ? AND id = ?',//编辑会员全球合伙人身份
     queryUsers:'SELECT * FROM users WHERE Invitdcode = ?',//查询邀请会员下线
     queryUsersFather:'SELECT * FROM users WHERE Invitcode = ?',//查询邀请会员上线
     //机器人相关数据操作
@@ -136,8 +138,8 @@ var UserSQL = {
     getInDirectPay: 'SELECT * FROM users WHERE Invitdcode = ? AND type = 2;',//通过邀请码查询用户
     upUserLevel: 'UPDATE users SET `level` = CASE id ? END WHERE id IN ?;',//通过邀请码查询用户
     //监控中心
-    getBotStateList:'SELECT a.longrange,a.shortrange,a.longstopx,a.shortstopx,a.maxnanpin,c.* FROM robot c LEFT JOIN (SELECT * FROM robot_parameter) AS a ON a.user_account = c.user_account WHERE bot_side IN (\'SHORT\', \'LONG\') ORDER BY c.marginLeverage DESC',//查询所有的持仓用户
-    getBotEmptyList:'SELECT a.longrange,a.shortrange,a.longstopx,a.shortstopx,a.maxnanpin,c.* FROM robot c LEFT JOIN (SELECT * FROM robot_parameter) AS a ON a.user_account = c.user_account WHERE bot_side NOT IN (\'SHORT\', \'LONG\',\'no\') ORDER BY c.marginLeverage DESC',//查询所有的空仓用户
+    getBotStateList:'SELECT a.longrange,a.shortrange,a.longstopx,a.shortstopx,a.maxnanpin,u.group,c.* FROM robot c LEFT JOIN (SELECT * FROM robot_parameter) AS a ON a.user_account = c.user_account LEFT JOIN (SELECT * FROM users) AS u ON c.user_account = u.account WHERE bot_side IN (\'SHORT\', \'LONG\') ORDER BY c.marginLeverage DESC',//查询所有的持仓用户
+    getBotEmptyList:'SELECT a.longrange,a.shortrange,a.longstopx,a.shortstopx,a.maxnanpin,u.group,c.* FROM robot c LEFT JOIN (SELECT * FROM robot_parameter) AS a ON a.user_account = c.user_account LEFT JOIN (SELECT * FROM users) AS u ON c.user_account = u.account WHERE bot_side NOT IN (\'SHORT\', \'LONG\',\'no\') ORDER BY c.marginLeverage DESC',//查询所有的空仓用户
     addBotLogs: 'INSERT INTO param_logs(operator,create_time,account,record,ip) VALUES (?,?,?,?,?)',//添加一个设置参数机器人的操作日志
     getBotLogs: 'SELECT * FROM param_logs order by create_time DESC LIMIT 0,50',//分页查询日志
     //异常机器人   失联

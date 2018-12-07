@@ -626,6 +626,32 @@ router.put('/putUserByType', function (req, res, next) {
     });
 });
 
+//会员分组接口
+router.put('/putUserByGroup', function (req, res, next) {
+    // 从连接池获取连接
+    pool.getConnection(function (err, connection) {
+        var param = req.body || req.params;// 获取前台页面传过来的参数
+            // 建立连接
+        connection.query(userSQL.putUsersByGroup, [param.group, param.account], function (err, result) {
+            // 释放连接
+            connection.release();
+            if (!!result) {
+                result = {
+                    status: 0,
+                    msg: '操作成功',
+                    data: result
+                };
+            } else {
+                result = {
+                    status: 200,
+                    msg: '未知处理异常'
+                };
+            }
+            responseJSON(res, result);
+        });
+    });
+});
+
 // 关闭机器人公共方法
 function offBotFn(connection, list, callback) {
     connection.query('UPDATE robot_parameter SET open = 0 WHERE user_account in (' + list + ')', function (err, result) {
@@ -1291,14 +1317,14 @@ router.put('/setBonusType', function (req, res, next) {
                                             type: 2
                                         };
                                         setFenHongRecordFn(connection, resUser, function (retData) {
-                                            addLogsFn(connection, list, function () {
-                                                result = {
-                                                    status: 0,
-                                                    msg: '操作成功'
-                                                };
-                                                responseJSON(res, result);
-                                                connection.release();
-                                            });
+                                            result = {
+                                                status: 0,
+                                                msg: '操作成功'
+                                            };
+                                            responseJSON(res, result);
+                                            connection.release();
+                                            // addLogsFn(connection, list, function () {
+                                            // });
                                         })
                                     })
                                 } else {//没有上级不需要分红  直接结束
