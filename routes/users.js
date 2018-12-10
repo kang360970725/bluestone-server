@@ -1294,7 +1294,7 @@ router.put('/setBonusType', function (req, res, next) {
             responseJSON(res, result);
             return;
         }
-        let time = new Date().getTime()
+        let time = new Date().getTime();
         let create_time = moment(time).format('YYYY-MM-DD HH:mm:ss');
         // 建立连接执行SQL
         connection.query(userSQL.setBonusType, [param.type, param.desc, param.account, param.id], function (err, result) {
