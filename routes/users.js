@@ -7,6 +7,7 @@ var mysql = require('mysql');
 var dbConfig = require('../db_models/DBConfig');
 var userSQL = require('../db_models/usersql');
 var moment = require('moment');
+var async = require('async');
 
 
 // 使用DBConfig.js的配置信息创建一个MySQL连接池
@@ -457,44 +458,44 @@ router.get('/getalluser', function (req, res, next) {
             list = [(parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)],
             counList = [];
         if (!!req.query.name && !!req.query.type && !!req.query.state) {
-            sql = userSQL.queryUserAll3
-            countSql = userSQL.queryUserCount3
+            sql = userSQL.queryUserAll3;
+            countSql = userSQL.queryUserCount3;
             list = ['%' + req.query.name + '%', req.query.type, req.query.state, (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = ['%' + req.query.name + '%', req.query.type, req.query.state]
         } else if (!!req.query.name && !!req.query.state) {
-            sql = userSQL.queryUserAll1
-            countSql = userSQL.queryUserCount1
+            sql = userSQL.queryUserAll1;
+            countSql = userSQL.queryUserCount1;
             list = ['%' + req.query.name + '%', req.query.state, (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = ['%' + req.query.name + '%', req.query.state]
         } else if (!!req.query.name && !!req.query.type) {
-            sql = userSQL.queryUserAll1_1
-            countSql = userSQL.queryUserCount1_1
+            sql = userSQL.queryUserAll1_1;
+            countSql = userSQL.queryUserCount1_1;
             list = ['%' + req.query.name + '%', req.query.type, (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = ['%' + req.query.name + '%', req.query.type]
         } else if (!!req.query.state && !!req.query.type) {
-            sql = userSQL.queryUserAll1_2
-            countSql = userSQL.queryUserCount1_2
+            sql = userSQL.queryUserAll1_2;
+            countSql = userSQL.queryUserCount1_2;
             list = [req.query.type, req.query.state, (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = [req.query.type, req.query.state]
         } else if (!!req.query.name) {
-            sql = userSQL.queryUserAll2_1
-            countSql = userSQL.queryUserCount2_1
+            sql = userSQL.queryUserAll2_1;
+            countSql = userSQL.queryUserCount2_1;
             list = ['%' + req.query.name + '%', (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = ['%' + req.query.name + '%',]
         } else if (!!req.query.type) {
-            sql = userSQL.queryUserAll2
-            countSql = userSQL.queryUserCount2
+            sql = userSQL.queryUserAll2;
+            countSql = userSQL.queryUserCount2;
             list = [req.query.type, (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = [req.query.type]
         } else if (!!req.query.state) {
-            sql = userSQL.queryUserAll2_2
-            countSql = userSQL.queryUserCount2_2
+            sql = userSQL.queryUserAll2_2;
+            countSql = userSQL.queryUserCount2_2;
             list = [req.query.state, (parseInt(req.query.pageIndex) - 1) * parseInt(req.query.pageSize), parseInt(req.query.pageSize)]
             counList = [req.query.state]
         }
         if (req.query.endtimetype == true || req.query.endtimetype == 'true') {
-            sql = userSQL.queryUserAll5
-            countSql = userSQL.queryUserAll5_1
+            sql = userSQL.queryUserAll5;
+            countSql = userSQL.queryUserAll5_1;
             let time = new Date();
             let StrTime = moment(time).format('YYYY-MM-DD HH:mm:ss');
             time.setDate(time.getDate() + 3);
@@ -526,26 +527,38 @@ router.get('/getalluser', function (req, res, next) {
                         return item;
                     });
                     sql += ')';
-                    connection.query(sql, function (err, resultToken) {
-                        result = result.map(function (item) {
-                            resultToken.forEach(function (itemtoken) {
-                                if (itemtoken.account == item.account) {
-                                    item.token = itemtoken.token;
-                                }
+
+                        connection.query(sql, function (err, resultToken) {
+                            async.map(result, function (item, callback) {
+                            // result = result.map(function (item) {
+                                let sql2 = 'SELECT bot_amount FROM robot r WHERE user_account = \'' + item.account + '\'';
+                                connection.query(sql2, function (err, resultPrice) {
+                                    if(!!resultPrice && resultPrice.length > 0){
+                                        item.principal = resultPrice[0].bot_amount;
+                                    }else {
+                                        item.principal = 0;
+                                    }
+                                    callback(null, []);
+                                });
+                                resultToken.forEach(function (itemtoken) {
+                                    if (itemtoken.account == item.account) {
+                                        item.token = itemtoken.token;
+                                    }
+                                });
+                                // return item;
+                            }, function (err, res1) {
+                                result = {
+                                    status: 0,
+                                    msg: '操作成功',
+                                    data: result,
+                                    count: resultCount[0].count
+                                };
+                                // 以json形式，把操作结果返回给前台页面
+                                responseJSON(res, result);
+                                // 释放连接
+                                connection.release();
                             });
-                            return item;
                         })
-                        result = {
-                            status: 0,
-                            msg: '操作成功',
-                            data: result,
-                            count: resultCount[0].count
-                        };
-                        // 以json形式，把操作结果返回给前台页面
-                        responseJSON(res, result);
-                        // 释放连接
-                        connection.release();
-                    })
                 })
             } else {
                 result = {
@@ -631,7 +644,7 @@ router.put('/putUserByGroup', function (req, res, next) {
     // 从连接池获取连接
     pool.getConnection(function (err, connection) {
         var param = req.body || req.params;// 获取前台页面传过来的参数
-            // 建立连接
+        // 建立连接
         connection.query(userSQL.putUsersByGroup, [param.group, param.account], function (err, result) {
             // 释放连接
             connection.release();
@@ -1152,9 +1165,9 @@ function setFenHongRecordFn(connection, obj, callback) {
     connection.query(userSQL.insertFenHong, [values], function (err, result) {
         let txt = '';
         let id = 11;
-        if(obj.type == 1){
+        if (obj.type == 1) {
             txt = '(' + obj.account + ')购买会员分红,费用:' + price + ';分给推广会员:' + obj.Invitation.length + '位,' + indUserTxt + ';共计分红金额:' + indExpPrice + ';分给团队会员:' + obj.team.length + '位' + teamUserTxt + ';共计分红金额:' + teamExpPrice + ';总计分红金额:' + (teamExpPrice + indExpPrice)
-        }else {
+        } else {
             txt = '(' + obj.account + ')盈利分红转账,费用:' + price + ';分给推广会员:' + obj.Invitation.length + '位,' + indUserTxt + ';共计分红金额:' + indExpPrice + ';分给团队会员:' + obj.team.length + '位' + teamUserTxt + ';共计分红金额:' + teamExpPrice + ';总计分红金额:' + (teamExpPrice + indExpPrice)
             id = 5
         }

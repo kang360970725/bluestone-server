@@ -6,27 +6,27 @@ var UserSQL = {
     getEmailCode:'SELECT * FROM code_verification WHERE code = ? AND account = ? AND type = ? AND endtime > ?',
     //用户账户相关
     confirmUser:'SELECT * FROM users WHERE account = ? and password = ?',//登录
-    queryUserAll:'SELECT * FROM users u WHERE u.level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll:'SELECT * FROM users u WHERE u.level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
     // getUserOutTime:'SELECT * FROM users u WHERE u.type in (\'1\',\'2\') AND u.endtime < ? AND activation_state = 1',//查询所有即将过期或者已过期用户
     getUserOutTime:'SELECT * FROM users u WHERE u.type in (\'1\',\'2\') AND u.account in (SELECT user_account FROM robot_parameter WHERE `open` = 1) AND u.endtime < ? AND activation_state = 1',//查询所有即将过期或者已过期用户
-    queryUserAll1:'SELECT * FROM users u WHERE account LIKE ? AND activation_state = ? AND u.level != 5 order by u.createtime  DESC LIMIT ?,?',//查询所有用户
-    queryUserAll1_1:'SELECT * FROM users u WHERE account LIKE ? AND type = ? AND level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
-    queryUserAll1_2:'SELECT * FROM users u WHERE type = ? AND activation_state = ? AND level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
-    queryUserAll2:'SELECT * FROM users u WHERE type = ? AND u.level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
-    queryUserAll2_1:'SELECT * FROM users u WHERE account LIKE ? AND u.level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
-    queryUserAll2_2:'SELECT * FROM users u WHERE activation_state = ? AND u.level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
-    queryUserAll3:'SELECT * FROM users u WHERE account LIKE ? AND type = ? AND activation_state = ? AND u.level != 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll1:'SELECT * FROM users u WHERE account LIKE ? AND activation_state = ? AND u.level < 5 order by u.createtime  DESC LIMIT ?,?',//查询所有用户
+    queryUserAll1_1:'SELECT * FROM users u WHERE account LIKE ? AND type = ? AND level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll1_2:'SELECT * FROM users u WHERE type = ? AND activation_state = ? AND level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll2:'SELECT * FROM users u WHERE type = ? AND u.level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll2_1:'SELECT * FROM users u WHERE account LIKE ? AND u.level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll2_2:'SELECT * FROM users u WHERE activation_state = ? AND u.level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
+    queryUserAll3:'SELECT * FROM users u WHERE account LIKE ? AND type = ? AND activation_state = ? AND u.level < 5 order by u.createtime DESC LIMIT ?,?',//查询所有用户
     queryUserAll4:'SELECT * FROM users WHERE Invitcode is Null',//查询所有需重置的用户
     queryUserAll5:'SELECT * FROM users WHERE endtime > ? AND endtime < ? LIMIT ?,?',//查询所有即将到期用户
     queryUserAll5_1:'SELECT count(1) as count FROM users WHERE endtime > ? AND endtime < ?',//查询所有即将到期用户数量
     queryUserCount:'SELECT count(1) as count FROM users',//统计用户总数分页用 count
-    queryUserCount1:'SELECT count(1) as count FROM users WHERE account LIKE ? AND activation_state = ? AND level != 5',//统计用户总数分页用 count
-    queryUserCount1_1:'SELECT count(1) as count FROM users WHERE account LIKE ? AND type = ? AND level != 5',//统计用户总数分页用 count
-    queryUserCount1_2:'SELECT count(1) as count FROM users WHERE type = ? AND activation_state = ? AND level != 5',//统计用户总数分页用 count
-    queryUserCount2:'SELECT count(1) as count FROM users WHERE type = ? AND level != 5',//统计用户总数分页用 count
-    queryUserCount2_1:'SELECT count(1) as count FROM users WHERE account LIKE ? AND level != 5',//统计用户总数分页用 count
-    queryUserCount2_2:'SELECT count(1) as count FROM users WHERE activation_state = ? AND level != 5',//统计用户总数分页用 count
-    queryUserCount3:'SELECT count(1) as count FROM users WHERE account LIKE ? AND type = ? AND activation_state = ? AND level != 5',//统计用户总数分页用 count
+    queryUserCount1:'SELECT count(1) as count FROM users WHERE account LIKE ? AND activation_state = ? AND level < 5',//统计用户总数分页用 count
+    queryUserCount1_1:'SELECT count(1) as count FROM users WHERE account LIKE ? AND type = ? AND level < 5',//统计用户总数分页用 count
+    queryUserCount1_2:'SELECT count(1) as count FROM users WHERE type = ? AND activation_state = ? AND level < 5',//统计用户总数分页用 count
+    queryUserCount2:'SELECT count(1) as count FROM users WHERE type = ? AND level < 5',//统计用户总数分页用 count
+    queryUserCount2_1:'SELECT count(1) as count FROM users WHERE account LIKE ? AND level < 5',//统计用户总数分页用 count
+    queryUserCount2_2:'SELECT count(1) as count FROM users WHERE activation_state = ? AND level < 5',//统计用户总数分页用 count
+    queryUserCount3:'SELECT count(1) as count FROM users WHERE account LIKE ? AND type = ? AND activation_state = ? AND level < 5',//统计用户总数分页用 count
     queryUser:'SELECT * FROM users WHERE account = ? ',//查询用户账号是否存在
     queryUserByUUId:'SELECT * FROM users WHERE uuid = ? ',//查询用户账号是否存在
     queryUserCode:'SELECT * FROM users WHERE Invitcode = ? ',//查询邀请码是否有效
@@ -57,8 +57,8 @@ var UserSQL = {
     offBot:'UPDATE robot_parameter SET open = 0 WHERE user_account in (?)',//用户机器人关闭
     putBot: 'UPDATE robot_parameter SET api=?,secret=?,open=?,entry=?,trendfollow=?,mm=?,mmpercent=?,nanpin=?,maxnanpin=?,mmnanpin=?,maxleverage=?,leverage=?,sleep=?,longrange=?,longstop=?,shortrange=?,shortstop=?,losscut=?,time=?,longstopx=?,shortstopx=?,longorder=?,shortorder=?,nanpin_cancel=?,nanpin_order=?,doten=? WHERE user_account = ?',//设置机器人信息
     insertBot: 'INSERT INTO robot_parameter(user_account,open) VALUES (?,0)',//写入机器人设置信息
-    insertBot2: 'INSERT INTO `member_platform`.`robot_parameter` (`user_account`, `api`, `secret`, `open`, `entry`, `trendfollow`, `mm`, `mmpercent`, `nanpin`, `maxnanpin`, `mmnanpin`, `maxleverage`, `leverage`, `sleep`, `longrange`, `longstop`, `shortrange`, `shortstop`, `losscut`, `time`, `longstopx`, `shortstopx`, `longorder`, `shortorder`, `nanpin_cancel`, `nanpin_order`, `doten`) VALUES (?, \'\', \'\', \'0\', \'250\', \'1\', \'1\', \'0.0007\', \'250\', \'28\', \'1.25\', \'50\', \'0\', \'40\', \'80\', \'28\', \'80\', \'28\', \'0.05\', \'5\', \'1999\', \'1999\', \'2\', \'2\', \'0\', \'0\', \'1\');',//写入机器人设置信息
-    insertBot3: 'INSERT INTO `member_platform`.`robot_parameter` (`user_account`, `marginLeverage`, `bot_prevDeposited`, `bot_prevWithdrawn`, `bot_amount`, `mmpercent`, `nanpin`, `maxnanpin`, `mmnanpin`, `maxleverage`, `leverage`, `sleep`, `longrange`, `longstop`, `shortrange`, `shortstop`, `losscut`, `time`, `longstopx`, `shortstopx`, `longorder`, `shortorder`, `nanpin_cancel`, `nanpin_order`, `doten`) VALUES (?, \'\', \'\', \'0\', \'250\', \'1\', \'1\', \'0.0007\', \'250\', \'28\', \'1.25\', \'50\', \'0\', \'40\', \'80\', \'28\', \'80\', \'28\', \'0.05\', \'5\', \'1999\', \'1999\', \'2\', \'2\', \'0\', \'0\', \'1\');',//写入机器人设置信息
+    insertBot2: 'INSERT INTO `member_platform`.`robot_parameter` (`user_account`, `api`, `secret`, `open`, `entry`, `trendfollow`, `mm`, `mmpercent`, `nanpin`, `maxnanpin`, `mmnanpin`, `maxleverage`, `leverage`, `sleep`, `longrange`, `longstop`, `shortrange`, `shortstop`, `losscut`, `time`, `longstopx`, `shortstopx`, `longorder`, `shortorder`, `nanpin_cancel`, `nanpin_order`, `doten`) VALUES (?, \'\', \'\', \'0\', \'250\', \'1\', \'1\', \'0.0007\', \'250\', \'28\', \'1.25\', \'50\', \'0\', \'40\', \'80\', \'28\', \'80\', \'28\', \'1\', \'5\', \'1999\', \'1999\', \'2\', \'2\', \'0\', \'0\', \'1\');',//写入机器人设置信息
+    insertBot3: 'INSERT INTO `member_platform`.`robot_parameter` (`user_account`, `marginLeverage`, `bot_prevDeposited`, `bot_prevWithdrawn`, `bot_amount`, `mmpercent`, `nanpin`, `maxnanpin`, `mmnanpin`, `maxleverage`, `leverage`, `sleep`, `longrange`, `longstop`, `shortrange`, `shortstop`, `losscut`, `time`, `longstopx`, `shortstopx`, `longorder`, `shortorder`, `nanpin_cancel`, `nanpin_order`, `doten`) VALUES (?, \'\', \'\', \'0\', \'250\', \'1\', \'1\', \'0.0007\', \'250\', \'28\', \'1.25\', \'50\', \'0\', \'40\', \'80\', \'28\', \'80\', \'28\', \'1\', \'5\', \'1999\', \'1999\', \'2\', \'2\', \'0\', \'0\', \'1\');',//写入机器人设置信息
     queryBotSimple:'SELECT * FROM robot WHERE user_account = ?',//查询机器人状态
     queryBot:'SELECT b.*, r.shortrange,r.longrange FROM robot b LEFT JOIN (SELECT shortrange,longrange,user_account FROM robot_parameter) AS r ON r.user_account = b.user_account WHERE b.user_account = ?',//查询机器人状态
     insertBotState: 'INSERT INTO robot (created,level,new_position_qty,bot_nanpin,max_position_qty,nanpin_count,status,bot_side,bot_size,bot_avgEntryPrice,bot_liquidationPrice,bot_mex_last,bot_balance,user_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',//添加机器人状态信息

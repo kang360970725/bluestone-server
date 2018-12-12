@@ -735,20 +735,20 @@ router.get('/getBotState/:state', function (req, res, next) {
         connection.query(sql, function (err, result) {
             if (!!result && result.length > 0) {
                 connection.release();
-                fetch('https://www.bitmex.com/api/v1/trade?count=200&reverse=true&symbol=XBTUSD', {
-                    method: 'GET'
-                }).then(data => {
-                    data.json().then(function (json) {
+                // fetch('https://www.bitmex.com/api/v1/trade?count=200&reverse=true&symbol=XBTUSD', {
+                //     method: 'GET'
+                // }).then(data => {
+                //     data.json().then(function (json) {
                         let results = {
                             status: 0,
                             msg: '查询成功',
-                            price: json[0].price,
-                            // price: 1,
+                            // price: json[0].price,
+                            price: 0,
                             data: result
                         };
                         responseJSON(res, results);
-                    })
-                })
+                    // })
+                // })
             } else {
                 let results = {
                     status: 0,
